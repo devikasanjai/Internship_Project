@@ -1,0 +1,7 @@
+fastapi
+sqlalchemy
+databases
+asyncpg
+psycopg2-binary
+requests
+jinja2
