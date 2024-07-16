@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Data for {{ city }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Weather Data for <span id="cityName"></span></h1>
+    <input type="text" placeholder="Search by city" id="city_search">
+    <button id="search_button">Search</button>
+    <canvas id="weatherChart" width="400" height="200"></canvas>
+    <script>
+        async function fetchData(city) {
+            try {
+                const response = await fetch(`http://127.0.0.1:8000/weather/${city}/all`, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                return [];
+            }
+        }
+
+        function renderChart(data) {
+    console.log('Data for chart:', data); // Add this line
+
+    const labels = data.map(entry => new Date(entry.timestamp).toLocaleString());
+    const temperatures = data.map(entry => entry.temperature);
+    const humidities = data.map(entry => entry.humidity);
+    const windSpeeds = data.map(entry => entry.wind_speed);
+
+    console.log('Labels:', labels); // Add this line
+    console.log('Temperatures:', temperatures); // Add this line
+    console.log('Humidities:', humidities); // Add this line
+    console.log('Wind Speeds:', windSpeeds); // Add this line
+
+    const ctx = document.getElementById('weatherChart').getContext('2d');
+    if (window.myChart instanceof Chart) {
+        window.myChart.destroy();
+    }
+    window.myChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Temperature (°C)',
+                    data: temperatures,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    fill: false
+                },
+                {
+                    label: 'Humidity (%)',
+                    data: humidities,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    fill: false
+                },
+                {
+                    label: 'Wind Speed (m/s)',
+                    data: windSpeeds,
+                    borderColor: 'rgba(255, 206, 86, 1)',
+                    backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                    fill: false
+                }
+            ]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+}
+
+        document.getElementById('search_button').addEventListener('click', async () => {
+            const city = document.getElementById('city_search').value;
+            const data = await fetchData(city);
+            renderChart(data);
+            document.getElementById('cityName').textContent = city;
+        });
+
+        // Initial city to display data for
+        const initialCity = "kochi";
+        (async () => {
+            const data = await fetchData(initialCity);
+            renderChart(data);
+            document.getElementById('cityName').textContent = initialCity;
+        })();
+    </script>
+</body>
+</html>
