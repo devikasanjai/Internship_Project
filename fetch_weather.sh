@@ -1,44 +1,33 @@
 #!/bin/bash
 
-API_URL="http://api.openweathermap.org/data/2.5/weather"
-API_KEY="ac5559a726f0d448e4c774c8fa2c6655"  # Replace with your OpenWeatherMap API key
+# Define the API endpoint of your FastAPI application for posting weather data
+FASTAPI_ENDPOINT="http://localhost:8000/weather/"
 
-fetch_weather_data() {
-    local city=$1
-    local url="${API_URL}?q=${city}&appid=${API_KEY}&units=metric"
-    curl -s "${url}"
-}
+# Define the OpenWeatherMap API endpoint template
+API_TEMPLATE="http://api.openweathermap.org/data/2.5/weather?q={city}&appid=ac5559a726f0d448e4c774c8fa2c6655&units=metric"
+LOG_FILE="/mnt/c/Users/HP/Downloads/Internship_Project-main/weather_data/fetch_weather_data.log"
+
 
 # Prompt user to enter city name
-echo "Enter the city for which you want to fetch weather data:"
+echo "Enter the city name for which you want to fetch weather data:"
 read CITY
+
+# Validate city input
 if [ -z "$CITY" ]; then
     echo "Error: City name cannot be empty."
     exit 1
 fi
 
-OUTPUT_DIR="$HOME/weather_data"
+# Replace the placeholder in the API URL with the user-provided city name
+API_ENDPOINT=$(echo "$API_TEMPLATE" | sed "s/{city}/$CITY/")
 
-# Duration and interval settings
-DURATION=3600   # 1 hour in seconds
-INTERVAL=300    # 5 minutes in seconds
+# Fetch weather data from OpenWeatherMap API
+response=$(curl -s -X GET "$API_ENDPOINT")
 
-# Start time
-START_TIME=$(date +%s)
-END_TIME=$((START_TIME + DURATION))
+# Log the response with a timestamp
+echo "$(date): $response" >> "$LOG_FILE"
 
-while [ $(date +%s) -lt $END_TIME ]; do
-    # Generate timestamp for file name
-    TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
-    OUTPUT_FILE="$OUTPUT_DIR/weather_data_${TIMESTAMP}.json"
-
-    # Fetch and save weather data
-    FETCHED_DATA=$(fetch_weather_data "$CITY")
-    echo "$FETCHED_DATA" > "$OUTPUT_FILE"
-
-    # Print status
-    echo "Weather data saved to $OUTPUT_FILE"
-
-    # Wait for the next interval
-    sleep $INTERVAL
-done
+# Post the weather data to your FastAPI application
+curl -s -X POST "$FASTAPI_ENDPOINT" \
+    -H "Content-Type: application/json" \
+    -d "{\"city\": \"$CITY\"}" >> "$LOG_FILE"
