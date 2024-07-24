@@ -20,12 +20,14 @@ app.add_middleware(
 )
 
 # Database URL
-DATABASE_URL = "postgresql://postgres:aezakmi%401@143.244.128.109/weather"
+# Database URL
+DATABASE_URL = "postgresql://devikasanjai:devxkaa03@host.docker.internal:5432/weather_data"
 
 # SQLAlchemy setup
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
+
 
 # Define your table schema
 class WeatherData(Base):
@@ -80,11 +82,10 @@ def fetch_weather_data(city: str):
 async def create_weather_data(weather_data_in: WeatherDataIn):
     session = SessionLocal()
     try:
-        db_weather_data = session.query(WeatherData).filter(WeatherData.city == weather_data_in.city).first()
-        if db_weather_data:
-            return db_weather_data
-
+        # Fetch current weather data from API
         weather_data = fetch_weather_data(weather_data_in.city)
+        
+        # Insert new record
         db_weather_data = WeatherData(**weather_data)
         session.add(db_weather_data)
         session.commit()
@@ -95,7 +96,6 @@ async def create_weather_data(weather_data_in: WeatherDataIn):
         raise HTTPException(status_code=400, detail=str(e))
     finally:
         session.close()
-
 @app.get("/weather/{city}/", response_model=WeatherDataOut)
 async def read_weather_data(city: str):
     session = SessionLocal()
