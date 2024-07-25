@@ -1,0 +1,30 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres
+    container_name: postgres_container
+    environment:
+      POSTGRES_USER: devikasanjai
+      POSTGRES_PASSWORD: devxkaa03
+      POSTGRES_DB: weather_data
+    ports:
+      - "5432:5432"
+    networks:
+      - my_network
+
+  fastapi:
+    image: myimage  # Replace this with the actual image name of your FastAPI app
+    container_name: mycontainer
+    environment:
+      DATABASE_URL: postgresql://devikasanjai:devxkaa03@postgres:5432/weather_data
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+    networks:
+      - my_network
+
+networks:
+  my_network:
+    driver: bridge
