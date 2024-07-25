@@ -9,15 +9,16 @@ LOG_FILE="/mnt/c/Users/HP/Downloads/Internship_Project-main/weather_data/fetch_w
 
 
 # Prompt user to enter city name
-echo "Enter the city name for which you want to fetch weather data:"
-read CITY
+# echo "Enter the city name for which you want to fetch weather data:"
+# read CITY
 
-# Validate city input
-if [ -z "$CITY" ]; then
-    echo "Error: City name cannot be empty."
-    exit 1
-fi
+# # Validate city input
+# if [ -z "$CITY" ]; then
+#     echo "Error: City name cannot be empty."
+#     exit 1
+# fi
 
+CITY="KOCHI"
 # Replace the placeholder in the API URL with the user-provided city name
 API_ENDPOINT=$(echo "$API_TEMPLATE" | sed "s/{city}/$CITY/")
 
@@ -31,3 +32,4 @@ echo "$(date): $response" >> "$LOG_FILE"
 curl -s -X POST "$FASTAPI_ENDPOINT" \
     -H "Content-Type: application/json" \
     -d "{\"city\": \"$CITY\"}" >> "$LOG_FILE"
+exit 
