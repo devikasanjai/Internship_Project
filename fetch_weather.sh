@@ -19,16 +19,11 @@ LOG_FILE="/mnt/c/Users/HP/Downloads/Internship_Project-main/weather_data/fetch_w
 # fi
 
 CITY="KOCHI"
-# Replace the placeholder in the API URL with the user-provided city name
 API_ENDPOINT=$(echo "$API_TEMPLATE" | sed "s/{city}/$CITY/")
-
-# Fetch weather data from OpenWeatherMap API
 response=$(curl -s -X GET "$API_ENDPOINT")
 
 # Log the response with a timestamp
 echo "$(date): $response" >> "$LOG_FILE"
-
-# Post the weather data to your FastAPI application
 curl -s -X POST "$FASTAPI_ENDPOINT" \
     -H "Content-Type: application/json" \
     -d "{\"city\": \"$CITY\"}" >> "$LOG_FILE"
